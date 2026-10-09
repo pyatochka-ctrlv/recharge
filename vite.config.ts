@@ -1,11 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { viteSingleFile } from 'vite-plugin-singlefile';
 
-export default defineConfig({
+// `npm run build:html` збирає все (JS, CSS, шрифти) в один файл standalone/index.html,
+// який можна відкрити в браузері подвійним кліком, без сервера.
+export default defineConfig(({ mode }) => ({
   base: './',
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), ...(mode === 'single' ? [viteSingleFile({ removeViteModuleLoader: true })] : [])],
   build: {
-    chunkSizeWarningLimit: 900,
+    chunkSizeWarningLimit: 2000,
+    ...(mode === 'single' ? { outDir: 'standalone', assetsInlineLimit: 100_000_000 } : {}),
   },
-});
+}));
